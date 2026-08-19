@@ -13,7 +13,7 @@ import {
   X,
 } from 'lucide-react'
 import { getSubstitutions } from '../data/workouts'
-import { getVideoDemo, getYoutubeEmbedUrl, getYoutubeThumbnail } from '../data/videos'
+import { getVideoDemo, getVideoStatusLabel, getYoutubeEmbedUrl, getYoutubeThumbnail } from '../data/videos'
 import { useLocalStorage } from '../hooks/useLocalStorage'
 
 function buildDescription(exercise) {
@@ -28,8 +28,8 @@ function ExerciseHero({ exercise }) {
     return (
       <div className="exercise-detail-hero detail-no-video">
         <Dumbbell size={42} />
-        <strong>Vídeo em revisão</strong>
-        <span>Não vamos mostrar uma demonstração duvidosa. O vídeo entra quando o movimento e a variação estiverem conferidos.</span>
+        <strong>Vídeo indisponível</strong>
+        <span>Este exercício ainda não possui uma demonstração vinculada.</span>
       </div>
     )
   }
@@ -120,6 +120,7 @@ export default function ExerciseDetail({ exercise, onClose, onSelectExercise, se
 
   if (!exercise) return null
 
+  const currentVideo = getVideoDemo(exercise.id)
   const substitutions = getSubstitutions(exercise.id)
   const videoFor = (item) => getVideoDemo(item.id)
 
@@ -149,6 +150,9 @@ export default function ExerciseDetail({ exercise, onClose, onSelectExercise, se
         </button>
 
         <ExerciseHero exercise={exercise} />
+        {currentVideo?.status === 'equivalente' && (
+          <div className="detail-video-status">{getVideoStatusLabel(currentVideo)}</div>
+        )}
 
         <div className="exercise-detail-content">
           <div className="detail-title-block">
