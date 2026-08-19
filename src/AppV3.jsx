@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import AppV2 from './AppV2.jsx'
 import ExerciseDetail from './components/ExerciseDetail.jsx'
 import { ALL_EXERCISES, PROFILE } from './data/workouts'
@@ -15,26 +15,44 @@ function readSetLogs() {
   }
 }
 
+function isoToday() {
+  return new Date().toISOString().slice(0, 10)
+}
+
 function migrateBaseline() {
   try {
     const key = 'project83-progress'
-    const current = JSON.parse(window.localStorage.getItem(key) || '[]')
-    if (!Array.isArray(current) || current.length !== 1) return
-    const first = current[0]
-    if (Number(first.weight) !== PROFILE.startWeight || Number(first.waist) > 0) return
-    window.localStorage.setItem(key, JSON.stringify([{ ...first, waist: PROFILE.startWaist }]))
+    const saved = window.localStorage.getItem(key)
+    const current = saved ? JSON.parse(saved) : []
+
+    if (!Array.isArray(current) || current.length === 0) {
+      window.localStorage.setItem(key, JSON.stringify([
+        { date: isoToday(), weight: PROFILE.startWeight, waist: PROFILE.startWaist },
+      ]))
+      return
+    }
+
+    if (current.length === 1) {
+      const first = current[0]
+      if (Number(first.weight) === PROFILE.startWeight && !Number(first.waist)) {
+        window.localStorage.setItem(key, JSON.stringify([
+          { ...first, waist: PROFILE.startWaist },
+        ]))
+      }
+    }
   } catch {
     // Se houver dado antigo inválido, o app principal continua usando seu fallback normal.
   }
 }
 
 export default function AppV3() {
+  useState(() => {
+    migrateBaseline()
+    return true
+  })
+
   const [selectedExercise, setSelectedExercise] = useState(null)
   const [detailLogs, setDetailLogs] = useState({})
-
-  useEffect(() => {
-    migrateBaseline()
-  }, [])
 
   const exerciseMap = useMemo(() => {
     const map = new Map()
