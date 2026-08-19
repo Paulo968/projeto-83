@@ -1,7 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import AppV2 from './AppV2.jsx'
 import ExerciseDetail from './components/ExerciseDetail.jsx'
-import { ALL_EXERCISES } from './data/workouts'
+import { ALL_EXERCISES, PROFILE } from './data/workouts'
 
 function normalize(value = '') {
   return value.trim().toLocaleLowerCase('pt-BR')
@@ -15,9 +15,26 @@ function readSetLogs() {
   }
 }
 
+function migrateBaseline() {
+  try {
+    const key = 'project83-progress'
+    const current = JSON.parse(window.localStorage.getItem(key) || '[]')
+    if (!Array.isArray(current) || current.length !== 1) return
+    const first = current[0]
+    if (Number(first.weight) !== PROFILE.startWeight || Number(first.waist) > 0) return
+    window.localStorage.setItem(key, JSON.stringify([{ ...first, waist: PROFILE.startWaist }]))
+  } catch {
+    // Se houver dado antigo inválido, o app principal continua usando seu fallback normal.
+  }
+}
+
 export default function AppV3() {
   const [selectedExercise, setSelectedExercise] = useState(null)
   const [detailLogs, setDetailLogs] = useState({})
+
+  useEffect(() => {
+    migrateBaseline()
+  }, [])
 
   const exerciseMap = useMemo(() => {
     const map = new Map()
