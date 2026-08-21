@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react'
 import AppV2 from './AppV2.jsx'
 import ExerciseDetail from './components/ExerciseDetail.jsx'
+import WgerLibrary from './components/WgerLibrary.jsx'
 import { ALL_EXERCISES, PROFILE } from './data/workouts'
+import './styles-wger.css'
 
 function normalize(value = '') {
   return value.trim().toLocaleLowerCase('pt-BR')
@@ -90,6 +92,7 @@ export default function AppV3() {
   return (
     <div className="project83-v3" onClickCapture={handleClickCapture}>
       <AppV2 />
+      <WgerLibrary />
       <ExerciseDetail
         exercise={selectedExercise}
         onClose={() => setSelectedExercise(null)}
